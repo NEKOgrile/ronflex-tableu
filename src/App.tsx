@@ -5,6 +5,7 @@ import { TableView } from './components/TableView';
 import { FilterBar } from './components/FilterBar';
 import { Grid3X3, Table as TableIcon, Plus } from 'lucide-react';
 import { cardsData } from './data/cards';
+import { supabase } from './lib/supabase';
 
 function App() {
   const [cards, setCards] = useState<SnorlaxCard[]>([]);
@@ -20,52 +21,58 @@ function App() {
 
   useEffect(() => {
     fetchCards();
-    loadCustomCards();
   }, []);
 
-  const loadCustomCards = () => {
-    const stored = localStorage.getItem('customCards');
-    if (stored) {
-      setCustomCards(JSON.parse(stored));
+  const fetchCards = async () => {
+    try {
+      // Fetch all cards from Supabase
+      const { data, error } = await supabase.from('snorlax_cards').select('*');
+      
+      if (error) {
+        console.error('Error fetching from Supabase:', error);
+        // Fallback to localStorage or cards.ts
+        const storedData = localStorage.getItem('cardDatabase');
+        if (storedData) {
+          const parsed: SnorlaxCard[] = JSON.parse(storedData);
+          const baseIds = new Set(cardsData.map(card => card.id));
+          const baseCards = parsed.filter((card: SnorlaxCard) => baseIds.has(card.id));
+          const customCardsFromStorage = parsed.filter((card: SnorlaxCard) => !baseIds.has(card.id));
+          setCards(baseCards);
+          setCustomCards(customCardsFromStorage);
+        } else {
+          setCards(cardsData);
+        }
+      } else if (data) {
+        const baseIds = new Set(cardsData.map(card => card.id));
+        const baseCards = data.filter((card: SnorlaxCard) => baseIds.has(card.id));
+        const customCardsFromDB = data.filter((card: SnorlaxCard) => !baseIds.has(card.id));
+        setCards(baseCards);
+        setCustomCards(customCardsFromDB);
+      }
+    } catch (error) {
+      console.error('Error loading cards:', error);
+      setCards(cardsData);
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const fetchCards = () => {
-    const storedData = localStorage.getItem('cardDatabase');
-    if (storedData) {
-      const parsed = JSON.parse(storedData);
-      setCards(parsed);
-      // Extract custom cards from stored data
-      const baseIds = new Set(cardsData.map(card => card.id));
-      const custom = parsed.filter(card => !baseIds.has(card.id));
-      setCustomCards(custom);
-    } else {
-      // Load from code + localStorage
-      const possessedData = JSON.parse(localStorage.getItem('possessedCards') || '{}');
-      const imageData = JSON.parse(localStorage.getItem('cardImages') || '{}');
-      const updatedCards = cardsData.map(card => ({
-        ...card,
-        possessed: possessedData[card.id] ?? card.possessed,
-        image_url: imageData[card.id] ?? card.image_url
-      }));
-      setCards(updatedCards);
-    }
-    setLoading(false);
   };
 
   const handleTogglePossessed = async (id: string, possessed: boolean) => {
     try {
-      // Update localStorage
-      const possessedData = JSON.parse(localStorage.getItem('possessedCards') || '{}');
-      possessedData[id] = possessed;
-      localStorage.setItem('possessedCards', JSON.stringify(possessedData));
-
+      // Update UI immediately
       setCards((prev) =>
         prev.map((card) => (card.id === id ? { ...card, possessed } : card))
       );
 
-      // Auto-save to database
-      setTimeout(() => handleSaveChanges(), 100);
+      // Update Supabase
+      const { error } = await supabase
+        .from('snorlax_cards')
+        .update({ possessed })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error updating card:', error);
+      }
     } catch (error) {
       console.error('Error updating card:', error);
     }
@@ -73,25 +80,23 @@ function App() {
 
   const handleUpdateImage = async (id: string, imageUrl: string) => {
     try {
-      // Update localStorage
-      const imageData = JSON.parse(localStorage.getItem('cardImages') || '{}');
-      imageData[id] = imageUrl;
-      localStorage.setItem('cardImages', JSON.stringify(imageData));
-
+      // Update UI immediately
       setCards((prev) =>
         prev.map((card) => (card.id === id ? { ...card, image_url: imageUrl } : card))
       );
 
-      // Auto-save to database
-      setTimeout(() => handleSaveChanges(), 100);
+      // Update Supabase
+      const { error } = await supabase
+        .from('snorlax_cards')
+        .update({ image_url: imageUrl })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error updating image:', error);
+      }
     } catch (error) {
       console.error('Error updating image:', error);
     }
-  };
-
-  const handleSaveChanges = () => {
-    localStorage.setItem('cardDatabase', JSON.stringify(allCards));
-    alert('Changes saved to database!');
   };
 
   const handleExportData = () => {
@@ -106,15 +111,29 @@ function App() {
     linkElement.click();
   };
 
-  const allCards = useMemo(() => {
-    const possessedData = JSON.parse(localStorage.getItem('possessedCards') || '{}');
-    const imageData = JSON.parse(localStorage.getItem('cardImages') || '{}');
+  const handleAddCard = async (newCardData: Omit<SnorlaxCard, 'id'>) => {
+    try {
+      const newCard: SnorlaxCard = {
+        id: `custom-${Date.now()}`,
+        ...newCardData
+      };
+      
+      const { error } = await supabase
+        .from('snorlax_cards')
+        .insert([newCard]);
 
-    return [...cards, ...customCards].map(card => ({
-      ...card,
-      possessed: possessedData[card.id] ?? card.possessed,
-      image_url: imageData[card.id] ?? card.image_url
-    }));
+      if (error) {
+        console.error('Error adding card:', error);
+      } else {
+        setCustomCards(prev => [...prev, newCard]);
+      }
+    } catch (error) {
+      console.error('Error adding card:', error);
+    }
+  };
+
+  const allCards = useMemo(() => {
+    return [...cards, ...customCards];
   }, [cards, customCards]);
 
   const filteredCards = useMemo(() => {
@@ -170,12 +189,7 @@ function App() {
                   <Plus className="w-5 h-5" />
                   Add Card
                 </button>
-                <button
-                  onClick={handleSaveChanges}
-                  className="px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors"
-                >
-                  Save Changes
-                </button>
+                
                 <button
                   onClick={handleExportData}
                   className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors"

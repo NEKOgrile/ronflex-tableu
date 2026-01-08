@@ -108,6 +108,26 @@ npm install
 npm run dev
 ```
 
+### Connexion à Supabase (optionnel)
+
+1. Crée un projet sur https://app.supabase.com et importe la table `snorlax_cards` (ou utilise le SQL fourni).
+2. Dans la racine du projet, crée un fichier `.env` avec ces variables (Vite exige le préfixe `VITE_`) :
+
+```
+VITE_SUPABASE_URL=https://<TON_PROJET>.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_xxx
+```
+
+3. Redémarre le serveur de dev :
+
+```bash
+npm run dev
+```
+
+4. Test rapide : ouvre la console du navigateur et vérifie que les données sont chargées depuis Supabase.
+
+Remarque : ne mets jamais la `sb_secret_...` dans le frontend.
+
 ### Build et Déploiement
 ```bash
 # Build pour production

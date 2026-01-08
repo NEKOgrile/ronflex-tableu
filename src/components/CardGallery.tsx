@@ -15,9 +15,9 @@ export function CardGallery({ cards, onTogglePossessed, onUpdateImage }: CardGal
   const handleImageSubmit = (cardId: string) => {
     if (imageInput.trim()) {
       onUpdateImage(cardId, imageInput.trim());
-      setEditingCard(null);
-      setImageInput('');
     }
+    setEditingCard(null);
+    setImageInput('');
   };
 
   return (
@@ -44,7 +44,7 @@ export function CardGallery({ cards, onTogglePossessed, onUpdateImage }: CardGal
             )}
 
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              {editingCard === card.id ? (
+                  {editingCard === card.id ? (
                 <div className="w-full px-2 space-y-2">
                   <input
                     type="text"
@@ -54,17 +54,15 @@ export function CardGallery({ cards, onTogglePossessed, onUpdateImage }: CardGal
                     className="w-full px-2 py-1 rounded-lg bg-white text-slate-900 text-xs"
                     autoFocus
                     onClick={(e) => e.stopPropagation()}
-                  />
-                  <div className="flex gap-1">
-                    <button
-                      onClick={(e) => {
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
                         e.stopPropagation();
                         handleImageSubmit(card.id);
-                      }}
-                      className="flex-1 bg-[#F4D35E] hover:bg-[#F4D35E]/80 text-slate-900 px-2 py-1 rounded-lg font-semibold text-xs transition-colors"
-                    >
-                      Save
-                    </button>
+                      }
+                    }}
+                    onBlur={() => handleImageSubmit(card.id)}
+                  />
+                  <div className="flex gap-1">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

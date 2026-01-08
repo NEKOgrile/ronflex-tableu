@@ -15,9 +15,9 @@ export function TableView({ cards, onTogglePossessed, onUpdateImage }: TableView
   const handleImageSubmit = (cardId: string) => {
     if (imageInput.trim()) {
       onUpdateImage(cardId, imageInput.trim());
-      setEditingCard(null);
-      setImageInput('');
     }
+    setEditingCard(null);
+    setImageInput('');
   };
 
   return (
@@ -92,14 +92,14 @@ export function TableView({ cards, onTogglePossessed, onUpdateImage }: TableView
                         placeholder="Enter image URL"
                         className="w-full px-4 py-2 rounded-lg bg-white/90 text-slate-900"
                         autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleImageSubmit(card.id);
+                          }
+                        }}
+                        onBlur={() => handleImageSubmit(card.id)}
                       />
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => handleImageSubmit(card.id)}
-                          className="flex-1 bg-[#F4D35E] hover:bg-[#F4D35E]/80 text-slate-900 px-4 py-2 rounded-lg font-semibold transition-colors"
-                        >
-                          Save
-                        </button>
                         <button
                           onClick={() => {
                             setEditingCard(null);
