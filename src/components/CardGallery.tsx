@@ -110,6 +110,12 @@ export function CardGallery({ cards, onTogglePossessed, onUpdateImage }: CardGal
               <div className="flex justify-between text-slate-400">
                 <span>#{card.number}</span>
               </div>
+              <p className="text-blue-300">{card.rarity}</p>
+              <p className="text-green-300">{card.type}</p>
+              <p className="text-purple-300">{card.language}</p>
+              <p className={`text-${card.principal === 'true' ? 'green' : 'red'}-300`}>
+                {card.principal === 'true' ? 'Principal' : 'Non Principal'}
+              </p>
             </div>
           </div>
         </div>
