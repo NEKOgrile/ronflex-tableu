@@ -88,6 +88,18 @@ function App() {
     alert('Changes saved to database!');
   };
 
+  const handleExportData = () => {
+    const dataStr = JSON.stringify(allCards, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = 'snorlax-cards-updated.json';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
   const allCards = useMemo(() => {
     const possessedData = JSON.parse(localStorage.getItem('possessedCards') || '{}');
     const imageData = JSON.parse(localStorage.getItem('cardImages') || '{}');
