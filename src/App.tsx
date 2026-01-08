@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react';
-import { supabase } from './lib/supabase';
 import { SnorlaxCard } from './types/card';
 import { CardGallery } from './components/CardGallery';
 import { TableView } from './components/TableView';
@@ -22,13 +21,20 @@ function App() {
 
   const fetchCards = async () => {
     try {
-      const { data, error } = await supabase
-        .from('snorlax_cards')
-        .select('*')
-        .order('release_date', { ascending: false });
+      const response = await fetch('/cards.json');
+      const data: SnorlaxCard[] = await response.json();
 
-      if (error) throw error;
-      setCards(data || []);
+      // Load possessed status from localStorage
+      const possessedData = JSON.parse(localStorage.getItem('possessedCards') || '{}');
+      const imageData = JSON.parse(localStorage.getItem('cardImages') || '{}');
+
+      const updatedCards = data.map(card => ({
+        ...card,
+        possessed: possessedData[card.id] ?? card.possessed,
+        image_url: imageData[card.id] ?? card.image_url
+      }));
+
+      setCards(updatedCards);
     } catch (error) {
       console.error('Error fetching cards:', error);
     } finally {
@@ -38,12 +44,10 @@ function App() {
 
   const handleTogglePossessed = async (id: string, possessed: boolean) => {
     try {
-      const { error } = await supabase
-        .from('snorlax_cards')
-        .update({ possessed })
-        .eq('id', id);
-
-      if (error) throw error;
+      // Update localStorage
+      const possessedData = JSON.parse(localStorage.getItem('possessedCards') || '{}');
+      possessedData[id] = possessed;
+      localStorage.setItem('possessedCards', JSON.stringify(possessedData));
 
       setCards((prev) =>
         prev.map((card) => (card.id === id ? { ...card, possessed } : card))
@@ -55,12 +59,10 @@ function App() {
 
   const handleUpdateImage = async (id: string, imageUrl: string) => {
     try {
-      const { error } = await supabase
-        .from('snorlax_cards')
-        .update({ image_url: imageUrl })
-        .eq('id', id);
-
-      if (error) throw error;
+      // Update localStorage
+      const imageData = JSON.parse(localStorage.getItem('cardImages') || '{}');
+      imageData[id] = imageUrl;
+      localStorage.setItem('cardImages', JSON.stringify(imageData));
 
       setCards((prev) =>
         prev.map((card) => (card.id === id ? { ...card, image_url: imageUrl } : card))

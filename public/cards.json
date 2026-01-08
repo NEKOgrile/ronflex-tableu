@@ -1,0 +1,28 @@
+[
+  {
+    "id": "1",
+    "possessed": false,
+    "image_url": "https://example.com/card1.jpg",
+    "name": "Snorlax Card 1",
+    "set": "Base Set",
+    "number": "001",
+    "release_date": "2023-01-01",
+    "rarity": "Common",
+    "type": "Normal",
+    "language": "EN",
+    "principal": "true"
+  },
+  {
+    "id": "2",
+    "possessed": true,
+    "image_url": "https://example.com/card2.jpg",
+    "name": "Snorlax Card 2",
+    "set": "Jungle",
+    "number": "002",
+    "release_date": "2023-02-01",
+    "rarity": "Rare",
+    "type": "Holo",
+    "language": "JP",
+    "principal": "false"
+  }
+]
