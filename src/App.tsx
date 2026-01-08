@@ -31,17 +31,25 @@ function App() {
   };
 
   const fetchCards = () => {
-    // Load possessed status from localStorage
-    const possessedData = JSON.parse(localStorage.getItem('possessedCards') || '{}');
-    const imageData = JSON.parse(localStorage.getItem('cardImages') || '{}');
-
-    const updatedCards = cardsData.map(card => ({
-      ...card,
-      possessed: possessedData[card.id] ?? card.possessed,
-      image_url: imageData[card.id] ?? card.image_url
-    }));
-
-    setCards(updatedCards);
+    const storedData = localStorage.getItem('cardDatabase');
+    if (storedData) {
+      const parsed = JSON.parse(storedData);
+      setCards(parsed);
+      // Extract custom cards from stored data
+      const baseIds = new Set(cardsData.map(card => card.id));
+      const custom = parsed.filter(card => !baseIds.has(card.id));
+      setCustomCards(custom);
+    } else {
+      // Load from code + localStorage
+      const possessedData = JSON.parse(localStorage.getItem('possessedCards') || '{}');
+      const imageData = JSON.parse(localStorage.getItem('cardImages') || '{}');
+      const updatedCards = cardsData.map(card => ({
+        ...card,
+        possessed: possessedData[card.id] ?? card.possessed,
+        image_url: imageData[card.id] ?? card.image_url
+      }));
+      setCards(updatedCards);
+    }
     setLoading(false);
   };
 
@@ -75,16 +83,9 @@ function App() {
     }
   };
 
-  const handleExportData = () => {
-    const dataStr = JSON.stringify(allCards, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = 'snorlax-cards-updated.json';
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+  const handleSaveChanges = () => {
+    localStorage.setItem('cardDatabase', JSON.stringify(allCards));
+    alert('Changes saved to database!');
   };
 
   const allCards = useMemo(() => {
@@ -150,6 +151,12 @@ function App() {
                 >
                   <Plus className="w-5 h-5" />
                   Add Card
+                </button>
+                <button
+                  onClick={handleSaveChanges}
+                  className="px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors"
+                >
+                  Save Changes
                 </button>
                 <button
                   onClick={handleExportData}
