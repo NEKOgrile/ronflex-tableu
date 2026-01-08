@@ -60,6 +60,21 @@ function App() {
     }
   };
 
+  const handleUpdateImage = async (id: string, imageUrl: string) => {
+    try {
+      // Update localStorage
+      const imageData = JSON.parse(localStorage.getItem('cardImages') || '{}');
+      imageData[id] = imageUrl;
+      localStorage.setItem('cardImages', JSON.stringify(imageData));
+
+      setCards((prev) =>
+        prev.map((card) => (card.id === id ? { ...card, image_url: imageUrl } : card))
+      );
+    } catch (error) {
+      console.error('Error updating image:', error);
+    }
+  };
+
   const handleAddCard = (newCard: Omit<SnorlaxCard, 'id'>) => {
     const card: SnorlaxCard = {
       ...newCard,
