@@ -75,15 +75,16 @@ function App() {
     }
   };
 
-  const handleAddCard = (newCard: Omit<SnorlaxCard, 'id'>) => {
-    const card: SnorlaxCard = {
-      ...newCard,
-      id: Date.now().toString(),
-    };
-    const updatedCustom = [...customCards, card];
-    setCustomCards(updatedCustom);
-    localStorage.setItem('customCards', JSON.stringify(updatedCustom));
-    setShowAddForm(false);
+  const handleExportData = () => {
+    const dataStr = JSON.stringify(allCards, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = 'snorlax-cards-updated.json';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
   };
 
   const allCards = useMemo(() => {
@@ -142,13 +143,21 @@ function App() {
             </p>
 
             <div className="flex justify-center mb-4">
-              <button
-                onClick={() => setShowAddForm(true)}
-                className="px-6 py-3 bg-[#F4D35E] text-slate-900 font-semibold rounded-xl hover:bg-[#F95738] hover:text-white transition-colors flex items-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                Add Card
-              </button>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  className="px-6 py-3 bg-[#F4D35E] text-slate-900 font-semibold rounded-xl hover:bg-[#F95738] hover:text-white transition-colors flex items-center gap-2"
+                >
+                  <Plus className="w-5 h-5" />
+                  Add Card
+                </button>
+                <button
+                  onClick={handleExportData}
+                  className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors"
+                >
+                  Export Data
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
