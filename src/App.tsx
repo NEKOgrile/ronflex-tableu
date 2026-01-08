@@ -4,6 +4,7 @@ import { CardGallery } from './components/CardGallery';
 import { TableView } from './components/TableView';
 import { FilterBar } from './components/FilterBar';
 import { Grid3X3, Table as TableIcon, Plus } from 'lucide-react';
+import cardsData from './data/cards.json';
 
 function App() {
   const [cards, setCards] = useState<SnorlaxCard[]>([]);
@@ -29,27 +30,19 @@ function App() {
     }
   };
 
-  const fetchCards = async () => {
-    try {
-      const response = await fetch('/cards.json');
-      const data: SnorlaxCard[] = await response.json();
+  const fetchCards = () => {
+    // Load possessed status from localStorage
+    const possessedData = JSON.parse(localStorage.getItem('possessedCards') || '{}');
+    const imageData = JSON.parse(localStorage.getItem('cardImages') || '{}');
 
-      // Load possessed status from localStorage
-      const possessedData = JSON.parse(localStorage.getItem('possessedCards') || '{}');
-      const imageData = JSON.parse(localStorage.getItem('cardImages') || '{}');
+    const updatedCards = cardsData.map(card => ({
+      ...card,
+      possessed: possessedData[card.id] ?? card.possessed,
+      image_url: imageData[card.id] ?? card.image_url
+    }));
 
-      const updatedCards = data.map(card => ({
-        ...card,
-        possessed: possessedData[card.id] ?? card.possessed,
-        image_url: imageData[card.id] ?? card.image_url
-      }));
-
-      setCards(updatedCards);
-    } catch (error) {
-      console.error('Error fetching cards:', error);
-    } finally {
-      setLoading(false);
-    }
+    setCards(updatedCards);
+    setLoading(false);
   };
 
   const handleTogglePossessed = async (id: string, possessed: boolean) => {
