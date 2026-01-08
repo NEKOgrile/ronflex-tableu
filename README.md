@@ -110,7 +110,7 @@ npm run dev
 
 ### Connexion à Supabase (optionnel)
 
-1. Crée un projet sur https://app.supabase.com et importe la table `snorlax_cards` (ou utilise le SQL fourni).
+1. Crée un projet sur https://app.supabase.com et importe la table `cards` (ou utilise le SQL fourni).
 2. Dans la racine du projet, crée un fichier `.env` avec ces variables (Vite exige le préfixe `VITE_`) :
 
 ```

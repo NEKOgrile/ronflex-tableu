@@ -1,18 +1,18 @@
--- Migration: add RLS policies for snorlax_cards
+-- Migration: add RLS policies for cards
 -- Enables row level security and adds safe public read + update for possessed
 
 /* Enable Row Level Security (RLS) on the table */
-ALTER TABLE public.snorlax_cards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cards ENABLE ROW LEVEL SECURITY;
 
 /* Allow public read (SELECT) */
 CREATE POLICY "Public read cards"
-  ON public.snorlax_cards
+  ON public.cards
   FOR SELECT
   USING (true);
 
 /* Allow updates from the client for the 'possessed' and 'image_url' fields */
 CREATE POLICY "Allow update possessed and image_url"
-  ON public.snorlax_cards
+  ON public.cards
   FOR UPDATE
   USING (true)
   WITH CHECK (true);

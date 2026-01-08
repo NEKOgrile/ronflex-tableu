@@ -2,7 +2,7 @@
   # Snorlax Card Collection Database
 
   1. New Tables
-    - `snorlax_cards`
+    - `cards`
       - `id` (uuid, primary key) - Unique identifier for each card
       - `possessed` (boolean) - Whether the card is possessed or not
       - `image_url` (text) - URL to the card image
@@ -18,7 +18,7 @@
       - `updated_at` (timestamptz) - Last update timestamp
 
   2. Security
-    - Enable RLS on `snorlax_cards` table
+    - Enable RLS on `cards` table
     - Add public read policy for all cards
     - Add public write policy for managing cards
 
@@ -27,7 +27,7 @@
     - All users can view and manage all cards
 */
 
-CREATE TABLE IF NOT EXISTS snorlax_cards (
+CREATE TABLE IF NOT EXISTS cards (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   possessed boolean DEFAULT false,
   image_url text DEFAULT '',
@@ -43,29 +43,29 @@ CREATE TABLE IF NOT EXISTS snorlax_cards (
   updated_at timestamptz DEFAULT now()
 );
 
-ALTER TABLE snorlax_cards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cards ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Anyone can view snorlax cards"
-  ON snorlax_cards
+  ON cards
   FOR SELECT
   TO anon, authenticated
   USING (true);
 
 CREATE POLICY "Anyone can insert snorlax cards"
-  ON snorlax_cards
+  ON cards
   FOR INSERT
   TO anon, authenticated
   WITH CHECK (true);
 
 CREATE POLICY "Anyone can update snorlax cards"
-  ON snorlax_cards
+  ON cards
   FOR UPDATE
   TO anon, authenticated
   USING (true)
   WITH CHECK (true);
 
 CREATE POLICY "Anyone can delete snorlax cards"
-  ON snorlax_cards
+  ON cards
   FOR DELETE
   TO anon, authenticated
   USING (true);

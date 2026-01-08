@@ -23,9 +23,13 @@ function App() {
   }, []);
 
   const fetchCards = async () => {
+    
     try {
       // Fetch all cards from Supabase
       const { data, error } = await supabase.from('cards').select('*');
+      console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
+      console.log("Cards data:", data);
+      console.log("Supabase error:", error);
 
       if (error) {
         console.error('Error fetching from Supabase:', error);
