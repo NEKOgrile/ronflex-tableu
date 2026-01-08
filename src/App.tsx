@@ -4,7 +4,6 @@ import { CardGallery } from './components/CardGallery';
 import { TableView } from './components/TableView';
 import { FilterBar } from './components/FilterBar';
 import { Grid3X3, Table as TableIcon, Plus } from 'lucide-react';
-import { cardsData } from './data/cards';
 import { supabase } from './lib/supabase';
 
 function App() {
@@ -27,31 +26,35 @@ function App() {
     try {
       // Fetch all cards from Supabase
       const { data, error } = await supabase.from('snorlax_cards').select('*');
-      
+
       if (error) {
         console.error('Error fetching from Supabase:', error);
-        // Fallback to localStorage or cards.ts
+        // Fallback to localStorage only
         const storedData = localStorage.getItem('cardDatabase');
         if (storedData) {
           const parsed: SnorlaxCard[] = JSON.parse(storedData);
-          const baseIds = new Set(cardsData.map(card => card.id));
-          const baseCards = parsed.filter((card: SnorlaxCard) => baseIds.has(card.id));
-          const customCardsFromStorage = parsed.filter((card: SnorlaxCard) => !baseIds.has(card.id));
-          setCards(baseCards);
-          setCustomCards(customCardsFromStorage);
+          setCards(parsed as SnorlaxCard[]);
+          setCustomCards([]);
         } else {
-          setCards(cardsData);
+          setCards([]);
+          setCustomCards([]);
         }
       } else if (data) {
-        const baseIds = new Set(cardsData.map(card => card.id));
-        const baseCards = data.filter((card: SnorlaxCard) => baseIds.has(card.id));
-        const customCardsFromDB = data.filter((card: SnorlaxCard) => !baseIds.has(card.id));
-        setCards(baseCards);
-        setCustomCards(customCardsFromDB);
+        // Normalize IDs and boolean-like fields
+        const mapped = data.map((row: any) => ({
+          ...row,
+          id: String(row.id),
+          possessed: !!row.possessed,
+          principal: row.principal === true || row.principal === 'true' ? 'true' : 'false',
+        })) as SnorlaxCard[];
+
+        // Use DB as source of truth: all fetched rows become `cards`
+        setCards(mapped);
+        setCustomCards([]);
       }
     } catch (error) {
       console.error('Error loading cards:', error);
-      setCards(cardsData);
+      setCards([]);
     } finally {
       setLoading(false);
     }
@@ -60,15 +63,15 @@ function App() {
   const handleTogglePossessed = async (id: string, possessed: boolean) => {
     try {
       // Update UI immediately
-      setCards((prev) =>
-        prev.map((card) => (card.id === id ? { ...card, possessed } : card))
-      );
+      setCards((prev) => prev.map((card) => (card.id === id ? { ...card, possessed } : card)));
+      setCustomCards((prev) => prev.map((card) => (card.id === id ? { ...card, possessed } : card)));
 
       // Update Supabase
+      const dbId = isNaN(Number(id)) ? id : Number(id);
       const { error } = await supabase
         .from('snorlax_cards')
         .update({ possessed })
-        .eq('id', id);
+        .eq('id', dbId);
 
       if (error) {
         console.error('Error updating card:', error);
@@ -81,15 +84,15 @@ function App() {
   const handleUpdateImage = async (id: string, imageUrl: string) => {
     try {
       // Update UI immediately
-      setCards((prev) =>
-        prev.map((card) => (card.id === id ? { ...card, image_url: imageUrl } : card))
-      );
+      setCards((prev) => prev.map((card) => (card.id === id ? { ...card, image_url: imageUrl } : card)));
+      setCustomCards((prev) => prev.map((card) => (card.id === id ? { ...card, image_url: imageUrl } : card)));
 
       // Update Supabase
+      const dbId = isNaN(Number(id)) ? id : Number(id);
       const { error } = await supabase
         .from('snorlax_cards')
         .update({ image_url: imageUrl })
-        .eq('id', id);
+        .eq('id', dbId);
 
       if (error) {
         console.error('Error updating image:', error);
@@ -113,19 +116,24 @@ function App() {
 
   const handleAddCard = async (newCardData: Omit<SnorlaxCard, 'id'>) => {
     try {
-      const newCard: SnorlaxCard = {
-        id: `custom-${Date.now()}`,
-        ...newCardData
-      };
-      
-      const { error } = await supabase
+      // Do not send `id` (let DB generate a numeric id)
+      const payload = { ...newCardData } as any;
+      const { data: inserted, error } = await supabase
         .from('snorlax_cards')
-        .insert([newCard]);
+        .insert([payload])
+        .select('*')
+        .single();
 
       if (error) {
         console.error('Error adding card:', error);
-      } else {
-        setCustomCards(prev => [...prev, newCard]);
+      } else if (inserted) {
+        const mapped: SnorlaxCard = {
+          ...inserted,
+          id: String(inserted.id),
+          possessed: !!inserted.possessed,
+          principal: inserted.principal === true || inserted.principal === 'true' ? 'true' : 'false',
+        } as SnorlaxCard;
+        setCustomCards(prev => [...prev, mapped]);
       }
     } catch (error) {
       console.error('Error adding card:', error);
