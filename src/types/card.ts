@@ -1,7 +1,7 @@
 export interface SnorlaxCard {
   id: string;
   possessed: boolean;
-  image_url: string;
+  image_url: string | null; // ✅ IMPORTANT
   name: string;
   set: string;
   number: string;

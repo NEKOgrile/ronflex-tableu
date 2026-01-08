@@ -25,7 +25,7 @@ function App() {
   const fetchCards = async () => {
     try {
       // Fetch all cards from Supabase
-      const { data, error } = await supabase.from('snorlax_cards').select('*');
+      const { data, error } = await supabase.from('cards').select('*');
 
       if (error) {
         console.error('Error fetching from Supabase:', error);
@@ -69,7 +69,7 @@ function App() {
       // Update Supabase
       const dbId = isNaN(Number(id)) ? id : Number(id);
       const { error } = await supabase
-        .from('snorlax_cards')
+        .from('cards')
         .update({ possessed })
         .eq('id', dbId);
 
@@ -81,26 +81,36 @@ function App() {
     }
   };
 
-  const handleUpdateImage = async (id: string, imageUrl: string) => {
-    try {
-      // Update UI immediately
-      setCards((prev) => prev.map((card) => (card.id === id ? { ...card, image_url: imageUrl } : card)));
-      setCustomCards((prev) => prev.map((card) => (card.id === id ? { ...card, image_url: imageUrl } : card)));
+const handleUpdateImage = async (id: string, imageUrl: string) => {
+  try {
+    const value: string | null = imageUrl.trim() === '' ? null : imageUrl.trim();
 
-      // Update Supabase
-      const dbId = isNaN(Number(id)) ? id : Number(id);
-      const { error } = await supabase
-        .from('snorlax_cards')
-        .update({ image_url: imageUrl })
-        .eq('id', dbId);
+    setCards(prev =>
+      prev.map(card =>
+        card.id === id ? { ...card, image_url: value } : card
+      )
+    );
 
-      if (error) {
-        console.error('Error updating image:', error);
-      }
-    } catch (error) {
+    setCustomCards(prev =>
+      prev.map(card =>
+        card.id === id ? { ...card, image_url: value } : card
+      )
+    );
+
+    const { error } = await supabase
+      .from('cards')
+      .update({ image_url: value })
+      .eq('id', Number(id));
+
+    if (error) {
       console.error('Error updating image:', error);
     }
-  };
+  } catch (error) {
+    console.error('Unexpected error updating image:', error);
+  }
+};
+
+
 
   const handleExportData = () => {
     const dataStr = JSON.stringify(allCards, null, 2);
@@ -119,7 +129,7 @@ function App() {
       // Do not send `id` (let DB generate a numeric id)
       const payload = { ...newCardData } as any;
       const { data: inserted, error } = await supabase
-        .from('snorlax_cards')
+        .from('cards')
         .insert([payload])
         .select('*')
         .single();

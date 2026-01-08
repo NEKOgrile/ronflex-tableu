@@ -13,12 +13,11 @@ export function TableView({ cards, onTogglePossessed, onUpdateImage }: TableView
   const [imageInput, setImageInput] = useState('');
 
   const handleImageSubmit = (cardId: string) => {
-    if (imageInput.trim()) {
-      onUpdateImage(cardId, imageInput.trim());
-    }
+    onUpdateImage(cardId, imageInput.trim());
     setEditingCard(null);
     setImageInput('');
   };
+
 
   return (
     <div className="overflow-x-auto rounded-xl border border-white/20">
@@ -73,7 +72,7 @@ export function TableView({ cards, onTogglePossessed, onUpdateImage }: TableView
                   <button
                     onClick={() => {
                       setEditingCard(card.id);
-                      setImageInput(card.image_url);
+                      setImageInput(card.image_url ?? '');
                     }}
                     className="absolute inset-0 bg-black/60 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                   >
