@@ -63,6 +63,9 @@ function App() {
       setCards((prev) =>
         prev.map((card) => (card.id === id ? { ...card, possessed } : card))
       );
+
+      // Auto-save to database
+      setTimeout(() => handleSaveChanges(), 100);
     } catch (error) {
       console.error('Error updating card:', error);
     }
@@ -78,6 +81,9 @@ function App() {
       setCards((prev) =>
         prev.map((card) => (card.id === id ? { ...card, image_url: imageUrl } : card))
       );
+
+      // Auto-save to database
+      setTimeout(() => handleSaveChanges(), 100);
     } catch (error) {
       console.error('Error updating image:', error);
     }
