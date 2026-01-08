@@ -12,13 +12,12 @@ export function CardGallery({ cards, onTogglePossessed, onUpdateImage }: CardGal
   const [editingCard, setEditingCard] = useState<string | null>(null);
   const [imageInput, setImageInput] = useState('');
 
-  const handleImageSubmit = (cardId: string) => {
-    if (imageInput.trim()) {
-      onUpdateImage(cardId, imageInput.trim());
-    }
-    setEditingCard(null);
-    setImageInput('');
-  };
+const handleImageSubmit = (cardId: string) => {
+  onUpdateImage(cardId, imageInput.trim());
+  setEditingCard(null);
+  setImageInput('');
+};
+
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
@@ -80,7 +79,7 @@ export function CardGallery({ cards, onTogglePossessed, onUpdateImage }: CardGal
                   onClick={(e) => {
                     e.stopPropagation();
                     setEditingCard(card.id);
-                    setImageInput(card.image_url);
+                    setImageInput(card.image_url ?? '');
                   }}
                   className="w-12 h-12 rounded-full bg-[#F95738] hover:bg-[#F95738]/80 flex items-center justify-center transition-colors shadow-lg"
                 >
