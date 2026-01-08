@@ -26,7 +26,11 @@ function App() {
     
     try {
       // Fetch all cards from Supabase
-      const { data, error } = await supabase.from('cards').select('*');
+      const { data, error } = await supabase
+        .from('cards')
+        .select('*')
+        .order('release_date', { ascending: true });
+
       console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
       console.log("Cards data:", data);
       console.log("Supabase error:", error);
