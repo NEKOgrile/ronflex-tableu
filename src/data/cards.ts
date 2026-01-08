@@ -1,4 +1,4 @@
-[
+export const cardsData = [
   {
     "id": "1",
     "possessed": false,
@@ -280,4 +280,4 @@
     "language": "JP",
     "principal": "true"
   }
-]
+];

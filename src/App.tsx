@@ -4,7 +4,7 @@ import { CardGallery } from './components/CardGallery';
 import { TableView } from './components/TableView';
 import { FilterBar } from './components/FilterBar';
 import { Grid3X3, Table as TableIcon, Plus } from 'lucide-react';
-import cardsData from './data/cards.json';
+import { cardsData } from './data/cards';
 
 function App() {
   const [cards, setCards] = useState<SnorlaxCard[]>([]);
