@@ -100,21 +100,30 @@ const handleImageSubmit = (cardId: string) => {
             </div>
           </button>
 
-          <div className="p-2 space-y-1">
-            <h3 className="font-bold text-white text-xs">{card.name}</h3>
-            <div className="space-y-0.5 text-xs">
-              <p className="text-[#F4D35E] line-clamp-1">{card.set}</p>
-              <div className="flex justify-between text-slate-400">
-                <span>#{card.number}</span>
-              </div>
-              <p className="text-blue-300">{card.rarity}</p>
-              <p className="text-green-300">{card.type}</p>
-              <p className="text-purple-300">{card.language}</p>
-              <p className={`text-${card.principal === 'true' ? 'green' : 'red'}-300`}>
-                {card.principal === 'true' ? 'Principal' : 'Non Principal'}
-              </p>
-            </div>
-          </div>
+<div className="p-2 space-y-1 text-xs">
+  <h3 className="font-bold text-white">{card.name}</h3>
+
+  {/* SET + DATE */}
+  <div className="flex justify-between items-center">
+    <p className="text-[#F4D35E] line-clamp-1">{card.set}</p>
+    <span className="text-slate-400 text-[10px]">
+      {card.release_date
+        ? new Date(card.release_date).getFullYear()
+        : ''}
+    </span>
+  </div>
+
+  <div className="space-y-0.5">
+    <p className="text-slate-400">#{card.number}</p>
+    <p className="text-blue-300">{card.rarity}</p>
+    <p className="text-green-300">{card.type}</p>
+    <p className="text-purple-300">{card.language}</p>
+    <p className={card.principal ? 'text-green-400' : 'text-red-400'}>
+      {card.principal ? 'Principal' : 'Non Principal'}
+    </p>
+  </div>
+</div>
+
         </div>
       ))}
     </div>
