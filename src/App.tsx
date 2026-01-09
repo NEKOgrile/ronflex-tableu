@@ -18,6 +18,8 @@ function App() {
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [selectedPrincipal, setSelectedPrincipal] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [imageModalUrl, setImageModalUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCards();
@@ -288,6 +290,14 @@ const handleUpdateImage = async (id: string, imageUrl: string) => {
                   <TableIcon className="w-5 h-5" />
                   <span className="hidden sm:inline">Table</span>
                 </button>
+                <button
+                  onClick={() => setIsEditMode((v) => !v)}
+                  className={`px-3 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+                    isEditMode ? 'bg-[#F95738] text-slate-900' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <span className="hidden sm:inline">{isEditMode ? 'Edit: ON' : 'Edit'}</span>
+                </button>
               </div>
             </div>
 
@@ -300,12 +310,16 @@ const handleUpdateImage = async (id: string, imageUrl: string) => {
                 cards={filteredCards}
                 onTogglePossessed={handleTogglePossessed}
                 onUpdateImage={handleUpdateImage}
+                isEditMode={isEditMode}
+                onOpenImage={(url) => setImageModalUrl(url)}
               />
             ) : (
               <TableView
                 cards={filteredCards}
                 onTogglePossessed={handleTogglePossessed}
                 onUpdateImage={handleUpdateImage}
+                isEditMode={isEditMode}
+                onOpenImage={(url) => setImageModalUrl(url)}
               />
             )}
           </div>
@@ -314,6 +328,21 @@ const handleUpdateImage = async (id: string, imageUrl: string) => {
 
       {showAddForm && (
         <AddCardModal onAdd={handleAddCard} onClose={() => setShowAddForm(false)} />
+      )}
+      {imageModalUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setImageModalUrl(null)}
+        >
+          <div className="max-w-4xl max-h-[90vh] p-4">
+            <img
+              src={imageModalUrl}
+              alt="Card preview"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg mx-auto"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

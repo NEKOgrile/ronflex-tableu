@@ -6,9 +6,11 @@ interface TableViewProps {
   cards: SnorlaxCard[];
   onTogglePossessed: (id: string, possessed: boolean) => void;
   onUpdateImage: (id: string, imageUrl: string) => void;
+  isEditMode: boolean;
+  onOpenImage: (imageUrl: string | null) => void;
 }
 
-export function TableView({ cards, onTogglePossessed, onUpdateImage }: TableViewProps) {
+export function TableView({ cards, onTogglePossessed, onUpdateImage, isEditMode, onOpenImage }: TableViewProps) {
   const [editingCard, setEditingCard] = useState<string | null>(null);
   const [imageInput, setImageInput] = useState('');
 
@@ -46,7 +48,13 @@ export function TableView({ cards, onTogglePossessed, onUpdateImage }: TableView
             >
               <td className="px-4 py-3">
                 <button
-                  onClick={() => onTogglePossessed(card.id, !card.possessed)}
+                  onClick={() => {
+                    if (isEditMode) {
+                      onTogglePossessed(card.id, !card.possessed);
+                    } else {
+                      onOpenImage(card.image_url ?? null);
+                    }
+                  }}
                   className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${
                     card.possessed
                       ? 'bg-[#119DA4] text-white'
@@ -71,8 +79,12 @@ export function TableView({ cards, onTogglePossessed, onUpdateImage }: TableView
                   )}
                   <button
                     onClick={() => {
-                      setEditingCard(card.id);
-                      setImageInput(card.image_url ?? '');
+                      if (isEditMode) {
+                        setEditingCard(card.id);
+                        setImageInput(card.image_url ?? '');
+                      } else {
+                        onOpenImage(card.image_url ?? null);
+                      }
                     }}
                     className="absolute inset-0 bg-black/60 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                   >
@@ -80,7 +92,7 @@ export function TableView({ cards, onTogglePossessed, onUpdateImage }: TableView
                   </button>
                 </div>
 
-                {editingCard === card.id && (
+                {editingCard === card.id && isEditMode && (
                   <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
                     <div className="bg-[#2D4059] rounded-xl p-6 w-full max-w-md space-y-4 border border-white/20">
                       <h3 className="text-white font-bold">Update Image URL</h3>
