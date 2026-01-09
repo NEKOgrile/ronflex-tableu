@@ -5,6 +5,7 @@ import { TableView } from './components/TableView';
 import { FilterBar } from './components/FilterBar';
 import { Grid3X3, Table as TableIcon, Plus } from 'lucide-react';
 import { supabase } from './lib/supabase';
+import { sortCardsByHierarchy } from './lib/sortingUtils';
 
 function App() {
   const [cards, setCards] = useState<SnorlaxCard[]>([]);
@@ -163,7 +164,7 @@ const handleUpdateImage = async (id: string, imageUrl: string) => {
   }, [cards, customCards]);
 
   const filteredCards = useMemo(() => {
-    return allCards.filter((card) => {
+    const filtered = allCards.filter((card) => {
       const matchesSearch =
         card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         card.number.toLowerCase().includes(searchTerm.toLowerCase());
@@ -174,6 +175,9 @@ const handleUpdateImage = async (id: string, imageUrl: string) => {
 
       return matchesSearch && matchesSet && matchesRarity && matchesLanguage && matchesPrincipal;
     });
+    
+    // Sort by release date, set, and card condition
+    return sortCardsByHierarchy(filtered);
   }, [allCards, searchTerm, selectedSet, selectedRarity, selectedLanguage, selectedPrincipal]);
 
   const sets = useMemo(() => [...new Set(allCards.map((card) => card.set))], [allCards]);
