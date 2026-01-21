@@ -1,13 +1,17 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { SnorlaxCard } from './types/card';
 import { CardGallery } from './components/CardGallery';
 import { TableView } from './components/TableView';
 import { FilterBar } from './components/FilterBar';
-import { Grid3X3, Table as TableIcon, Plus } from 'lucide-react';
+import { Grid3X3, Table as TableIcon, Plus, User } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { sortCardsByHierarchy } from './lib/sortingUtils';
+import { useAuth } from './contexts/AuthContext';
+import { LoginPage } from './pages/Login';
+import { ProfilePage } from './pages/Profile';
 
-function App() {
+function CardCollectionApp() {
   const [cards, setCards] = useState<SnorlaxCard[]>([]);
   const [customCards, setCustomCards] = useState<SnorlaxCard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,6 +24,17 @@ function App() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [imageModalUrl, setImageModalUrl] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  // Vérifier l'authentification pour le mode édition
+  const handleEditModeToggle = () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    setIsEditMode((v) => !v);
+  };
 
   useEffect(() => {
     fetchCards();
@@ -291,12 +306,19 @@ const handleUpdateImage = async (id: string, imageUrl: string) => {
                   <span className="hidden sm:inline">Table</span>
                 </button>
                 <button
-                  onClick={() => setIsEditMode((v) => !v)}
+                  onClick={handleEditModeToggle}
                   className={`px-3 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
                     isEditMode ? 'bg-[#F95738] text-slate-900' : 'text-slate-300 hover:text-white'
                   }`}
+                  title={!isAuthenticated ? 'Se connecter pour éditer' : ''}
                 >
                   <span className="hidden sm:inline">{isEditMode ? 'Edit: ON' : 'Edit'}</span>
+                </button>
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="px-3 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 text-slate-300 hover:text-white hover:bg-white/10"
+                >
+                  <User className="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -479,5 +501,15 @@ const AddCardModal = ({ onAdd, onClose }: { onAdd: (card: Omit<SnorlaxCard, 'id'
     </div>
   );
 };
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/" element={<CardCollectionApp />} />
+    </Routes>
+  );
+}
 
 export default App;
