@@ -6,10 +6,9 @@ import { AlertCircle } from 'lucide-react';
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,18 +17,8 @@ export function LoginPage() {
     setLoading(true);
 
     try {
-      if (isSignUp) {
-        await signUp(email, password);
-        setEmail('');
-        setPassword('');
-        setError('');
-        // Show success message and redirect
-        alert('Inscription réussie! Vérifiez votre email.');
-        navigate('/');
-      } else {
-        await signIn(email, password);
-        navigate('/');
-      }
+      await signIn(email, password);
+      navigate('/');
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue');
     } finally {
@@ -41,12 +30,10 @@ export function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 shadow-xl p-8">
         <h1 className="text-3xl font-bold text-white mb-2 text-center">
-          {isSignUp ? 'Créer un compte' : 'Connexion'}
+          Connexion
         </h1>
         <p className="text-white/60 text-center mb-8">
-          {isSignUp 
-            ? 'Créez un compte pour gérer vos cartes' 
-            : 'Connectez-vous pour gérer vos cartes'}
+          Connectez-vous pour gérer vos cartes
         </p>
 
         {error && (
@@ -92,25 +79,9 @@ export function LoginPage() {
             disabled={loading}
             className="w-full py-2 bg-gradient-to-r from-[#F95738] to-[#F4D35E] text-slate-900 font-semibold rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6"
           >
-            {loading 
-              ? 'Chargement...' 
-              : (isSignUp ? "S'inscrire" : 'Se connecter')}
+            {loading ? 'Chargement...' : 'Se connecter'}
           </button>
         </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-white/60 text-sm">
-            {isSignUp 
-              ? 'Vous avez déjà un compte? ' 
-              : "Vous n'avez pas de compte? "}
-            <button
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-[#F4D35E] hover:text-[#F4D35E]/80 font-semibold transition-colors"
-            >
-              {isSignUp ? 'Se connecter' : "S'inscrire"}
-            </button>
-          </p>
-        </div>
       </div>
     </div>
   );
