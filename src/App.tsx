@@ -4,12 +4,11 @@ import { SnorlaxCard } from './types/card';
 import { CardGallery } from './components/CardGallery';
 import { TableView } from './components/TableView';
 import { FilterBar } from './components/FilterBar';
-import { Grid3X3, Table as TableIcon, Plus, User } from 'lucide-react';
+import { Grid3X3, Table as TableIcon, Plus } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { sortCardsByHierarchy } from './lib/sortingUtils';
 import { useAuth } from './contexts/AuthContext';
 import { LoginPage } from './pages/Login';
-import { ProfilePage } from './pages/Profile';
 
 function CardCollectionApp() {
   const [cards, setCards] = useState<SnorlaxCard[]>([]);
@@ -34,6 +33,14 @@ function CardCollectionApp() {
       return;
     }
     setIsEditMode((v) => !v);
+  };
+
+  const handleAddCardClick = () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    setShowAddForm(true);
   };
 
   useEffect(() => {
@@ -230,8 +237,9 @@ const handleUpdateImage = async (id: string, imageUrl: string) => {
             <div className="flex justify-center mb-4">
               <div className="flex gap-4">
                 <button
-                  onClick={() => setShowAddForm(true)}
+                  onClick={handleAddCardClick}
                   className="px-6 py-3 bg-[#F4D35E] text-slate-900 font-semibold rounded-xl hover:bg-[#F95738] hover:text-white transition-colors flex items-center gap-2"
+                  title={!isAuthenticated ? 'Se connecter pour ajouter une carte' : ''}
                 >
                   <Plus className="w-5 h-5" />
                   Add Card
@@ -258,6 +266,10 @@ const handleUpdateImage = async (id: string, imageUrl: string) => {
               <div className="bg-gradient-to-br from-teal-600 to-teal-800 rounded-2xl px-6 py-4 backdrop-blur-sm border border-white/20">
                 <div className="text-3xl font-bold text-white">{completionPercent}%</div>
                 <div className="text-sm text-teal-200">Complétude</div>
+              </div>
+              <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl px-6 py-4 backdrop-blur-sm border border-white/20">
+                <div className="text-3xl font-bold text-white">{allCards.length}</div>
+                <div className="text-sm text-purple-200">Total</div>
               </div>
             </div>
           </header>
@@ -315,12 +327,6 @@ const handleUpdateImage = async (id: string, imageUrl: string) => {
                   <span className="hidden sm:inline">{isEditMode ? 'Edit: ON' : 'Edit'}</span>
                 </button>
                 <button
-                  onClick={() => navigate('/profile')}
-                  className="px-3 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 text-slate-300 hover:text-white hover:bg-white/10"
-                >
-                  <User className="w-5 h-5" />
-                </button>
-              </div>
             </div>
 
             {filteredCards.length === 0 ? (
@@ -506,7 +512,6 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/profile" element={<ProfilePage />} />
       <Route path="/" element={<CardCollectionApp />} />
     </Routes>
   );
