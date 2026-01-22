@@ -18,6 +18,7 @@ dist-ssr
 *.suo
 *.ntvs*
 *.njsproj
+.bolt
 *.sln
 *.sw?
 .env
