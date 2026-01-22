@@ -326,7 +326,7 @@ const handleUpdateImage = async (id: string, imageUrl: string) => {
                 >
                   <span className="hidden sm:inline">{isEditMode ? 'Edit: ON' : 'Edit'}</span>
                 </button>
-                <button
+              </div>
             </div>
 
             {filteredCards.length === 0 ? (
